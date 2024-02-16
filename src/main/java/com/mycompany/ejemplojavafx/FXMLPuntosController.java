@@ -7,7 +7,10 @@ package com.mycompany.ejemplojavafx;
 
 
 import Modelo.Puntos;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import java.net.URL;
 import java.util.LinkedList;
@@ -25,6 +28,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.json.JSONObject;
+import org.json.JSONArray;
+
 
 
 /**
@@ -68,7 +74,7 @@ public class FXMLPuntosController implements Initializable {
     }
     
     @FXML
-    private void saveFile (ActionEvent a) {
+    private void saveFile (ActionEvent a) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("GUARDAR ARCHIVO");
         fileChooser.getExtensionFilters().addAll(
@@ -76,13 +82,37 @@ public class FXMLPuntosController implements Initializable {
                 new FileChooser.ExtensionFilter("Archivos de texto", "*.json*"),
                 new FileChooser.ExtensionFilter("Todos los archivos", "*.*"));
                 //new FileChooser.ExtensionFilter
+                
+                fileChooser.setInitialFileName("archivo.json");
         
         File file = fileChooser.showSaveDialog(s);
         if (file != null){
             System.out.println("Archivo guardado en:" + file.getPath());
+             if (!file.getPath().endsWith(".json")) {
+            file = new File(file.getPath() + ".json");
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            JSONArray jsonArray = new JSONArray();
+
+            // Convertir cada objeto Puntos en un objeto JSONObject y agregarlo al JSONArray
+            for (Puntos punto : listaP) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("x", punto.getX());
+                jsonObject.put("y", punto.getY());
+                jsonArray.put(jsonObject);
+            }
+
+            // Convertir el JSONArray a una cadena de texto en formato JSON
+            String jsonString = jsonArray.toString();
+            
+              // Escribir la cadena de texto en el archivo
+            writer.write(jsonString);
+        }catch (IOException e) {
+            e.printStackTrace();
         }
         
-    }
+         }
+        }
+    }   
     
     
     
